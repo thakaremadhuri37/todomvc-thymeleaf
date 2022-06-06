@@ -1,3 +1,4 @@
+
 package com.wimdeblauwe.examples.todomvcthymeleaf;
 
 import org.springframework.boot.SpringApplication;

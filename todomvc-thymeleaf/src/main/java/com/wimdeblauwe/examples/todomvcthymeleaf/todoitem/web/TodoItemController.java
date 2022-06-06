@@ -1,128 +1,84 @@
 package com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.web;
 
 import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItem;
-import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemNotFoundException;
+//import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemNotFoundException;
 import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/")
 public class TodoItemController {
 
-    private final TodoItemRepository repository;
+	private final TodoItemRepository repository;
 
-    public TodoItemController(TodoItemRepository repository) {
-        this.repository = repository;
-    }
+	public TodoItemController(TodoItemRepository repository) {
+		this.repository = repository;
+	}
 
-    @GetMapping
-    public String index(Model model) {
-        addAttributesForIndex(model, ListFilter.ALL);
-        return "index";
-    }
+	@GetMapping
+	public String index(Model model) {
+		addAttributesForIndex(model);
+		return "index";
+	}
 
-    @GetMapping("/active")
-    public String indexActive(Model model) {
-        addAttributesForIndex(model, ListFilter.ACTIVE);
-        return "index";
-    }
+	private void addAttributesForIndex(Model model) {
+		model.addAttribute("item", new TodoItemFormData());
+		model.addAttribute("todos", getTodoItems());
+		model.addAttribute("totalNumberOfItems", repository.count());
+	}
 
-    @GetMapping("/completed")
-    public String indexCompleted(Model model) {
-        addAttributesForIndex(model, ListFilter.COMPLETED);
-        return "index";
-    }
+	@PostMapping
+	public String addNewTodoItem( @ModelAttribute("item") TodoItemFormData formData) {
+		repository.save(new TodoItem(formData.getTitle(), false));
 
-    private void addAttributesForIndex(Model model,
-                                       ListFilter listFilter) {
-        model.addAttribute("item", new TodoItemFormData());
-        model.addAttribute("filter", listFilter);
-        model.addAttribute("todos", getTodoItems(listFilter));
-        model.addAttribute("totalNumberOfItems", repository.count());
-        model.addAttribute("numberOfActiveItems", getNumberOfActiveItems());
-        model.addAttribute("numberOfCompletedItems", getNumberOfCompletedItems());
-    }
+		return "redirect:/";
+	}
 
-    @PostMapping
-    public String addNewTodoItem(@Valid @ModelAttribute("item") TodoItemFormData formData) {
-        repository.save(new TodoItem(formData.getTitle(), false));
+	@PutMapping("/{id}/toggle")
+	public String toggleSelection(@PathVariable("id") Long id) {
+		Optional<TodoItem> todoItemOptional = repository.findById(id);
 
-        return "redirect:/";
-    }
+		if (todoItemOptional.isPresent()) {
+			TodoItem todoItem = todoItemOptional.get();
+			todoItem.setCompleted(!todoItem.isCompleted());
+			repository.save(todoItem);
+		}
+		return "redirect:/";
+	}
 
-    @PutMapping("/{id}/toggle")
-    public String toggleSelection(@PathVariable("id") Long id) {
-        TodoItem todoItem = repository.findById(id)
-                                      .orElseThrow(() -> new TodoItemNotFoundException(id));
+	@DeleteMapping("/{id}")
+	public String deleteTodoItem(@PathVariable("id") Long id) {
+		repository.deleteById(id);
 
-        todoItem.setCompleted(!todoItem.isCompleted());
-        repository.save(todoItem);
-        return "redirect:/";
-    }
+		return "redirect:/";
+	}
 
-    @PutMapping("/toggle-all")
-    public String toggleAll() {
-        List<TodoItem> todoItems = repository.findAll();
-        for (TodoItem todoItem : todoItems) {
-            todoItem.setCompleted(!todoItem.isCompleted());
-            repository.save(todoItem);
-        }
-        return "redirect:/";
-    }
+	private List<TodoItemDto> getTodoItems() {
+		return convertToDto(repository.findAll());
 
-    @DeleteMapping("/{id}")
-    public String deleteTodoItem(@PathVariable("id") Long id) {
-        repository.deleteById(id);
+	}
 
-        return "redirect:/";
-    }
+	private List<TodoItemDto> convertToDto(List<TodoItem> todoItems) {
 
-    @DeleteMapping("/completed")
-    public String deleteCompletedItems() {
-        List<TodoItem> items = repository.findAllByCompleted(true);
-        for (TodoItem item : items) {
-            repository.deleteById(item.getId());
-        }
-        return "redirect:/";
-    }
+		List<TodoItemDto> list = new ArrayList<>();
+		for (TodoItem todoItem : todoItems) {
+			list.add(new TodoItemDto(todoItem.getId(), todoItem.getTitle(), todoItem.isCompleted()));
+		}
+		return list;
+	}
 
-    private List<TodoItemDto> getTodoItems(ListFilter filter) {
-        return switch (filter) {
-            case ALL -> convertToDto(repository.findAll());
-            case ACTIVE -> convertToDto(repository.findAllByCompleted(false));
-            case COMPLETED -> convertToDto(repository.findAllByCompleted(true));
-        };
-    }
+	public static record TodoItemDto(long id, String title, boolean completed) {
+	}
 
-    private List<TodoItemDto> convertToDto(List<TodoItem> todoItems) {
-        return todoItems
-                .stream()
-                .map(todoItem -> new TodoItemDto(todoItem.getId(),
-                                                 todoItem.getTitle(),
-                                                 todoItem.isCompleted()))
-                .collect(Collectors.toList());
-    }
-
-    private int getNumberOfActiveItems() {
-        return repository.countAllByCompleted(false);
-    }
-
-    private int getNumberOfCompletedItems() {
-        return repository.countAllByCompleted(true);
-    }
-
-    public static record TodoItemDto(long id, String title, boolean completed) {
-    }
-
-    public enum ListFilter {
-        ALL,
-        ACTIVE,
-        COMPLETED
-    }
+	// data transfer obj
 }
