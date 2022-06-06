@@ -1,0 +1,34 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+
+ <link th:href="@{/css/index.css}" href="/css/index.css" rel="stylesheet" type="text/css" />
+</head>
+<body >
+<section >
+    
+        <h1>To DO List</h1>
+        <form th:action="@{/}" method="post" th:object="${item}">
+            <input class="new-todo" placeholder="What needs to be done?" autofocus
+                   th:field="*{title}">
+        </form>
+  
+   
+    <section  th:if="${totalNumberOfItems > 0}">
+   
+        <ul class="todo-list" th:remove="all-but-first">
+            <li th:insert="fragments :: todoItem(${item})" th:each="item : ${todos}" th:remove="tag">
+            </li>
+     
+        </ul>
+    </section>
+
+</section>
+
+</body>
+</html>
