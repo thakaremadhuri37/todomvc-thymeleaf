@@ -1,0 +1,9 @@
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/web/UserController.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/UserRepository.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/User.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/web/TodoItemFormData.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/TodoItemRepository.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/web/TodoItemController.class
+com/wimdeblauwe/examples/todomvcthymeleaf/TodomvcThymeleafApplication.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/TodoItemDto.class
+com/wimdeblauwe/examples/todomvcthymeleaf/todoitem/TodoItem.class
