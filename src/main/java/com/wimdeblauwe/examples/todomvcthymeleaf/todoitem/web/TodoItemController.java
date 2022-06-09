@@ -1,6 +1,7 @@
 package com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.web;
 
 import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItem;
+import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemDto;
 //import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemNotFoundException;
 import com.wimdeblauwe.examples.todomvcthymeleaf.todoitem.TodoItemRepository;
 import org.springframework.stereotype.Controller;
@@ -77,8 +78,10 @@ public class TodoItemController {
 		return list;
 	}
 
-	public static record TodoItemDto(long id, String title, boolean completed) {
-	}
+	/*
+	 * public static record TodoItemDto(long id, String title, boolean completed) {
+	 * }
+	 */
 
-	// data transfer obj
+	
 }
